@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai&family=Kanit&family=Noto+Sans+Thai+Looped:wght@300&family=Sarabun:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+        }
+
+        .form-header {
+            margin-top: 100px;
+            background-color: #28B463;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px; /* มุมโค้งด้านบน */
+            margin-left:200px;
+            margin-right:200px;
+        }
+
+        .form-container {
+            align-self:center;
+            padding: 20px;
+            border-radius: 0 0 10px 10px; /* มุมโค้งด้านล่าง */
+            background-color: #FFFFFF; /* พื้นหลังสีขาว */
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column; /* เปลี่ยนเป็นแนวแกนตั้ง */
+            align-items: flex-start; /* จัดข้อความคำเตือนไปด้านล่างของ input */
+            margin-bottom: 10px;
+        }
+
+        .form-group .input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label {
+            flex: 1;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 24px;
+            text-align: right;
+        }
+
+        .form-group input[type="text"] {
+            flex: 2;
+            padding: 10px;
+            border: 2px solid black;
+            border-radius: 5px;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            font-size: 16px;
+            background-color: #FFFFFF;
+        }
+
+        .form-group .error-message {
+            color: red;
+            font-size: 14px;
+            margin-left:10px;
+            margin-top: 5px; /* เพิ่มระยะห่างด้านบนของข้อความคำเตือน */
+        }
+
+        input[type="submit"], input[type="reset"] {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #28B463;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-header">
+        <h1>แก้ไขข้อมูล</h1>
+    </div>
+    <div class="form-container">
+        <form method="post" action="update_std.php">
+            <input type="hidden" name="old" id="old" value="" readonly> 
+            <div class="form-group">
+                <label for="id">ID:</label>
+                <div class="input-container">
+                    <input type="text" name="id" id="id">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="en_name">Name:</label>
+                <div class="input-container">
+                    <input type="text" name="en_name" id="en_name">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="en_surname">Surname:</label>
+                <div class="input-container">
+                    <input type="text" name="en_surname" id="en_surname">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="th_name">ชื่อ:</label>
+                <div class="input-container">
+                    <input type="text" name="th_name" id="th_name">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="th_surname">นามสกุล:</label>
+                <div class="input-container">
+                    <input type="text" name="th_surname" id="th_surname">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="major_code">Major:</label>
+                <div class="input-container">
+                    <input type="text" name="major_code" id="major_code">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <div class="input-container">
+                    <input type="text" name="email" id="email">
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <input type="submit"> <input type="reset">
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const old_id = urlParams.get('id');
+            
+            // กำหนดค่า id เป็นค่า value ใน input field แบบ hidden สำหรับ old
+            const oldInput = document.getElementById('old');
+            oldInput.value = old_id;
+
+            // เรียกใช้ฟังก์ชันเพื่อแสดงข้อมูลนักศึกษาที่ต้องการแก้ไขโดยใช้ id
+            displayStudentData(old_id);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                const inputs = form.querySelectorAll('input[type="text"]');
+                
+                inputs.forEach(function(input) {
+                    const errorMessage = input.parentElement.querySelector('.error-message');
+                    
+                    if (input.name === 'id') {
+                        // ตรวจสอบว่า ID เป็นตัวเลขหรือไม่
+                        if (!isNumeric(input.value)) {
+                            input.style.borderColor = 'red';
+                            errorMessage.textContent = 'กรุณากรอก ID เป็นตัวเลขเท่านั้น';
+                        } else {
+                            input.style.borderColor = '';
+                            errorMessage.textContent = '';
+                        }
+                    } else {
+                        if (input.value.trim() === '') {
+                            input.style.borderColor = 'red';
+                            errorMessage.textContent = 'กรุณากรอกข้อมูลในช่องนี้';
+                        } else {
+                            input.style.borderColor = '';
+                            errorMessage.textContent = '';
+                        }
+                        
+                        if (input.name === 'email' && !isValidEmail(input.value)) {
+                            input.style.borderColor = 'red';
+                            errorMessage.textContent = 'กรุณากรอกเป็นรูปแบบ Email';
+                        }
+                    }
+                });
+    
+                let hasEmptyFields = false;
+                inputs.forEach(function(input) {
+                    if (input.value.trim() === '') {
+                        hasEmptyFields = true;
+                    }
+                });
+    
+                if (hasEmptyFields) {
+                    event.preventDefault(); // หยุดการส่งฟอร์มหากมี input ว่าง
+                }
+            });
+        });
+        
+
+        function isNumeric(value) {
+            return /^\d+$/.test(value);
+        }
+        // ฟังก์ชันตรวจสอบรูปแบบอีเมล
+        function isValidEmail(email) {
+            const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+            return emailRegex.test(email);
+        }
+    </script>
+    
+</body>
+</html>
